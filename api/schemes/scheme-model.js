@@ -22,7 +22,7 @@ function find() {
   return db
     .select("sc.*")
     .from("schemes as sc")
-    .count("st.step_id", "as: number_of_steps")
+    .count("st.step_id as number_of_steps")
     .leftJoin("steps as st", function () {
       this.on("sc.scheme_id", "st.scheme_id");
     })
