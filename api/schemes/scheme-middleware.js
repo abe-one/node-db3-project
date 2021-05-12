@@ -1,7 +1,6 @@
 const Scheme = require("./scheme-model");
-const {
-  scheme,
-} = require("../validationSchemas"); /* If `scheme_id` does not exist in the database:
+const { scheme, step } = require("../validationSchemas");
+/* If `scheme_id` does not exist in the database:
 
   status 404
   {
@@ -51,7 +50,15 @@ const validateScheme = (req, _res, next) => {
     "message": "invalid step"
   }
 */
-const validateStep = (req, res, next) => {};
+const validateStep = (req, _res, next) => {
+  step
+    .validate(req.body, { stripUnknown: true })
+    .then((validStep) => {
+      req.body = validStep;
+      next();
+    })
+    .catch(next);
+};
 
 module.exports = {
   checkSchemeId,
