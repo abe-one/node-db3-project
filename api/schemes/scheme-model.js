@@ -1,4 +1,3 @@
-const { on } = require("nodemon");
 const db = require("../../data/db-config");
 
 function find() {
@@ -19,75 +18,32 @@ async function findById(scheme_id) {
     .from("schemes as sc")
     .leftJoin("steps as st", function () {
       this.on("sc.scheme_id", "st.scheme_id");
-    });
-  // .where("sc.scheme_id", "1")
-  return scheme;
-  // EXERCISE B
-  /*
-    1B- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`:
+    })
+    .where("sc.scheme_id", `${scheme_id}`)
+    .orderBy("st.step_number");
 
-      SELECT
-          sc.scheme_name,
-          st.*
-      FROM schemes as sc
-      LEFT JOIN steps as st
-          ON sc.scheme_id = st.scheme_id
-      WHERE sc.scheme_id = 1
-      ORDER BY st.step_number ASC;
+  const emptyScheme = {
+    scheme_id: scheme_id,
+    steps: [],
+  };
 
-    2B- When you have a grasp on the query go ahead and build it in Knex
-    making it parametric: instead of a literal `1` you should use `scheme_id`.
+  const sortedScheme = scheme.reduce((acc, step) => {
+    if (!acc.scheme_name) {
+      acc.scheme_name = step.scheme_name;
+    }
 
-    3B- Test in Postman and see that the resulting data does not look like a scheme,
-    but more like an array of steps each including scheme information:
+    if (!step.step_id) {
+      return acc;
+    }
 
-      [
-        {
-          "scheme_id": 1,
-          "scheme_name": "World Domination",
-          "step_id": 2,
-          "step_number": 1,
-          "instructions": "solve prime number theory"
-        },
-        {
-          "scheme_id": 1,
-          "scheme_name": "World Domination",
-          "step_id": 1,
-          "step_number": 2,
-          "instructions": "crack cyber security"
-        },
-        // etc
-      ]
+    // eslint-disable-next-line no-unused-vars
+    const { scheme_id, scheme_name, ...trimmedStep } = step;
+    acc.steps.push(trimmedStep);
 
-    4B- Using the array obtained and vanilla JavaScript, create an object with
-    the structure below, for the case _when steps exist_ for a given `scheme_id`:
+    return acc;
+  }, emptyScheme);
 
-      {
-        "scheme_id": 1,
-        "scheme_name": "World Domination",
-        "steps": [
-          {
-            "step_id": 2,
-            "step_number": 1,
-            "instructions": "solve prime number theory"
-          },
-          {
-            "step_id": 1,
-            "step_number": 2,
-            "instructions": "crack cyber security"
-          },
-          // etc
-        ]
-      }
-
-    5B- This is what the result should look like _if there are no steps_ for a `scheme_id`:
-
-      {
-        "scheme_id": 7,
-        "scheme_name": "Have Fun!",
-        "steps": []
-      }
-  */
+  return sortedScheme;
 }
 
 function findSteps(scheme_id) {
