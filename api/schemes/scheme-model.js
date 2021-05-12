@@ -12,8 +12,8 @@ function find() {
     .orderBy("sc.scheme_id");
 }
 
-async function findById(scheme_id) {
-  const scheme = await db
+const getSchemeSteps = (scheme_id) =>
+  db
     .select("sc.scheme_name", "st.*")
     .from("schemes as sc")
     .leftJoin("steps as st", function () {
@@ -22,6 +22,8 @@ async function findById(scheme_id) {
     .where("sc.scheme_id", `${scheme_id}`)
     .orderBy("st.step_number");
 
+async function findById(scheme_id) {
+  const scheme = await getSchemeSteps(scheme_id);
   const emptyScheme = {
     scheme_id: scheme_id,
     steps: [],
@@ -46,28 +48,20 @@ async function findById(scheme_id) {
   return sortedScheme;
 }
 
-function findSteps(scheme_id) {
-  // EXERCISE C
-  /*
-    1C- Build a query in Knex that returns the following data.
-    The steps should be sorted by step_number, and the array
-    should be empty if there are no steps for the scheme:
+async function findSteps(scheme_id) {
+  const scheme = await getSchemeSteps(scheme_id);
 
-      [
-        {
-          "step_id": 5,
-          "step_number": 1,
-          "instructions": "collect all the sheep in Scotland",
-          "scheme_name": "Get Rich Quick"
-        },
-        {
-          "step_id": 4,
-          "step_number": 2,
-          "instructions": "profit",
-          "scheme_name": "Get Rich Quick"
-        }
-      ]
-  */
+  const sortedScheme = scheme.reduce((acc, step) => {
+    if (!step.step_id) {
+      return acc;
+    }
+    // eslint-disable-next-line no-unused-vars
+    const { scheme_id, ...trimmedStep } = step;
+    acc.push(trimmedStep);
+    return acc;
+  }, []);
+
+  return sortedScheme;
 }
 
 function add(scheme) {
