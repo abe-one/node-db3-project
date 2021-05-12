@@ -1,5 +1,5 @@
 // DO NOT CHANGE THIS FILE
-const express = require('express')
+const express = require('express') 
 const { checkSchemeId, validateScheme, validateStep } = require('./scheme-middleware')
 const Schemes = require('./scheme-model.js')
 
@@ -23,7 +23,7 @@ const router = express.Router()
     // etc
   ]
  */
-router.get('/', (req, res, next) => {
+router.get('/', (_req, res, next) => {
   Schemes.find()
     .then(schemes => {
       res.json(schemes)
@@ -140,7 +140,7 @@ router.post('/:scheme_id/steps', checkSchemeId, validateStep, (req, res, next) =
     .catch(next)
 })
 
-router.use((err, req, res, next) => { // eslint-disable-line
+router.use((err, _req, res, _next) => { // eslint-disable-line
   res.status(err.status || 500).json({
     sageAdvice: 'Finding the real error is 90% of the bug fix',
     message: err.message,
