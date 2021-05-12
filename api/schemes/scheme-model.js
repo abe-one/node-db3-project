@@ -64,11 +64,9 @@ async function findSteps(scheme_id) {
   return sortedScheme;
 }
 
-function add(scheme) {
-  // EXERCISE D
-  /*
-    1D- This function creates a new scheme and resolves to _the newly created scheme_.
-  */
+async function add(scheme) {
+  const id = await db("schemes").insert(scheme);
+  return db("schemes").where("scheme_id", `${id}`);
 }
 
 function addStep(scheme_id, step) {
