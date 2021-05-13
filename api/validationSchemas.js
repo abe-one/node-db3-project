@@ -1,11 +1,15 @@
 const yup = require("yup");
 
 exports.scheme = yup.object({
-  scheme_name: yup.string().trim().required("invalid scheme_name"),
+  scheme_name: yup
+    .string("invalid scheme_name")
+    .typeError("invalid scheme_name")
+    .trim()
+    .required("invalid scheme_name"),
 });
 
 exports.step = yup.object({
-  step: yup.string().trim().required("invalid step"),
+  instructions: yup.string("invalid step").trim().required("invalid step"),
 
   step_number: yup.number().typeError("invalid step").min(1, "invalid step"),
 });

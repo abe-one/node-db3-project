@@ -8,11 +8,11 @@ const { scheme, step } = require("../validationSchemas");
   }
 */
 const checkSchemeId = (req, res, next) => {
-  const id = req.params.id;
-  Scheme.findById(id)
+  const id = req.params.scheme_id;
+  Scheme.findSchemeId(id)
     .then((scheme) => {
-      if (scheme) {
-        req.promisedScheme = scheme;
+      console.log(scheme);
+      if (scheme.length !== 0) {
         next();
       } else {
         res
@@ -32,13 +32,16 @@ const checkSchemeId = (req, res, next) => {
   }
 */
 const validateScheme = (req, _res, next) => {
+  // if (!req.boy) {
+  //   next({ message: "invalid scheme_name", status: 400 });
+  // }
   scheme
     .validate(req.body, { stripUnknown: true })
     .then((validScheme) => {
       req.body = validScheme;
       next();
     })
-    .catch(next);
+    .catch((err) => next({ message: err.message, status: 400 }));
 };
 
 /*
@@ -57,7 +60,7 @@ const validateStep = (req, _res, next) => {
       req.body = validStep;
       next();
     })
-    .catch(next);
+    .catch((err) => next({ message: err.message, status: 400 }));
 };
 
 module.exports = {

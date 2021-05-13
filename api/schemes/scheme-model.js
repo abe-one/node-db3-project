@@ -12,8 +12,8 @@ function find() {
     .orderBy("sc.scheme_id");
 }
 
-const getSchemeSteps = (scheme_id) =>
-  db
+const getSchemeSteps = async (scheme_id) =>
+  await db
     .select("sc.scheme_name", "st.*")
     .from("schemes as sc")
     .leftJoin("steps as st", function () {
@@ -22,14 +22,19 @@ const getSchemeSteps = (scheme_id) =>
     .where("sc.scheme_id", `${scheme_id}`)
     .orderBy("st.step_number");
 
+const findSchemeId = (id) => {
+  return db("schemes").where("schemes.scheme_id", id);
+};
+
 async function findById(scheme_id) {
   const scheme = await getSchemeSteps(scheme_id);
   const emptyScheme = {
     scheme_id: scheme_id,
     steps: [],
-  };
+  }; //!Why is await useless here
 
   const sortedScheme = scheme.reduce((acc, step) => {
+    //!but functional here?
     if (!acc.scheme_name) {
       acc.scheme_name = step.scheme_name;
     }
@@ -46,10 +51,18 @@ async function findById(scheme_id) {
   }, emptyScheme);
 
   return sortedScheme;
+  // return scheme;
 }
 
 async function findSteps(scheme_id) {
-  const scheme = await getSchemeSteps(scheme_id);
+  const scheme = await db
+    .select("sc.scheme_name", "st.*")
+    .from("schemes as sc")
+    .leftJoin("steps as st", function () {
+      this.on("sc.scheme_id", "st.scheme_id");
+    })
+    .where("sc.scheme_id", `${scheme_id}`)
+    .orderBy("st.step_number");
 
   const sortedScheme = scheme.reduce((acc, step) => {
     if (!step.step_id) {
@@ -66,16 +79,12 @@ async function findSteps(scheme_id) {
 
 async function add(scheme) {
   const id = await db("schemes").insert(scheme);
-  return db("schemes").where("scheme_id", `${id}`);
+  return db("schemes").where("scheme_id", `${id}`).first();
 }
 
-function addStep(scheme_id, step) {
-  // EXERCISE E
-  /*
-    1E- This function adds a step to the scheme with the given `scheme_id`
-    and resolves to _all the steps_ belonging to the given `scheme_id`,
-    including the newly created one.
-  */
+async function addStep(scheme_id, step) {
+  await db("steps").insert({ ...step, scheme_id: scheme_id });
+  return findSteps(scheme_id);
 }
 
 module.exports = {
@@ -84,4 +93,5 @@ module.exports = {
   findSteps,
   add,
   addStep,
+  findSchemeId,
 };
