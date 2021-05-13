@@ -1,5 +1,7 @@
 const yup = require("yup");
 
+exports.string = yup.string().typeError("invalid scheme_name");
+
 exports.scheme = yup.object({
   scheme_name: yup
     .string("invalid scheme_name")

@@ -22,19 +22,16 @@ const getSchemeSteps = async (scheme_id) =>
     .where("sc.scheme_id", `${scheme_id}`)
     .orderBy("st.step_number");
 
-const findSchemeId = (id) => {
-  return db("schemes").where("schemes.scheme_id", id);
-};
+const findSchemeId = (id) => db("schemes").where("schemes.scheme_id", id);
 
 async function findById(scheme_id) {
   const scheme = await getSchemeSteps(scheme_id);
   const emptyScheme = {
-    scheme_id: scheme_id,
+    scheme_id: parseFloat(scheme_id),
     steps: [],
-  }; //!Why is await useless here
+  };
 
   const sortedScheme = scheme.reduce((acc, step) => {
-    //!but functional here?
     if (!acc.scheme_name) {
       acc.scheme_name = step.scheme_name;
     }

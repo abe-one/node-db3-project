@@ -1,5 +1,5 @@
 const Scheme = require("./scheme-model");
-const { scheme, step } = require("../validationSchemas");
+const { scheme, step, string } = require("../validationSchemas");
 /* If `scheme_id` does not exist in the database:
 
   status 404
@@ -31,17 +31,18 @@ const checkSchemeId = (req, res, next) => {
     "message": "invalid scheme_name"
   }
 */
-const validateScheme = (req, _res, next) => {
-  // if (!req.boy) {
-  //   next({ message: "invalid scheme_name", status: 400 });
-  // }
-  scheme
-    .validate(req.body, { stripUnknown: true })
-    .then((validScheme) => {
-      req.body = validScheme;
-      next();
-    })
-    .catch((err) => next({ message: err.message, status: 400 }));
+const validateScheme = async (req, _res, next) => {
+  if (!req.body.scheme_name) {
+    next({ message: "invalid scheme_name", status: 400 });
+  }
+  try {
+    await string.validate(req.body.scheme_name, { strict: true });
+    const validScheme = await scheme.validate(req.body, { stripUnknown: true });
+    req.body = validScheme;
+    next();
+  } catch (err) {
+    next({ message: err.message, status: 400 });
+  }
 };
 
 /*
@@ -54,6 +55,9 @@ const validateScheme = (req, _res, next) => {
   }
 */
 const validateStep = (req, _res, next) => {
+  if (!req.body.instructions) {
+    next({ message: "invalid step", status: 400 });
+  }
   step
     .validate(req.body, { stripUnknown: true })
     .then((validStep) => {
